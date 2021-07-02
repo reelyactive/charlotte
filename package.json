@@ -1,0 +1,29 @@
+{
+  "name": "charlotte",
+  "homepage": "https://reelyactive.github.io/charlotte/",
+  "author": {
+    "name": "reelyActive",
+    "email": "info@reelyactive.com"
+  },
+  "description": "Spin physical web and semantic web visualisations using Cytoscape.js.  We believe in an open Internet of Things.",
+  "keywords": [
+    "reelyActive",
+    "cytoscape.js",
+    "physical web",
+    "semantic web",
+    "client-side"
+  ],
+  "version": "1.0.0",
+  "main": "./js/charlotte.js",
+  "files": [
+    "./js/charlotte.js"
+  ],
+  "repository": {
+    "url": "https://github.com/reelyactive/charlotte",
+    "type": "git"
+  },
+  "contributors": [
+    { "name": "Jeffrey Dungen" }
+  ],
+  "license": "MIT"
+}
