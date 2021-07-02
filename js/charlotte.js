@@ -59,9 +59,7 @@ let charlotte = (function() {
       addDeviceNode(deviceSignature, devices[deviceSignature]);
     }
 
-    layout.stop();
-    layout = cy.elements().makeLayout(options.layout);
-    layout.run();
+    updateLayout();
   }
 
 
@@ -77,6 +75,7 @@ let charlotte = (function() {
 
     cy = cytoscape(options);
     layout = cy.layout({ name: layoutName || DEFAULT_LAYOUT_NAME, cy: cy });
+    cy.on('resize', updateLayout);
   }
 
 
@@ -132,6 +131,14 @@ let charlotte = (function() {
       let isPresent = edgeSignatures.includes(edge.id());
       if(!isPresent) { cy.remove(edge); }
     });
+  }
+
+
+  // Update the layout
+  function updateLayout() {
+    layout.stop();
+    layout = cy.elements().makeLayout(options.layout);
+    layout.run();
   }
 
 
