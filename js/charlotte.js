@@ -89,10 +89,12 @@ let charlotte = (function() {
     }
 
     let node = cy.getElementById(deviceSignature);
-    let isAnchor = device.hasOwnProperty('position');
-    let nodeClass = isAnchor ? 'cyAnchorNode' : 'cyDeviceNode';
+    let nodeClass = isAnchor(device) ? 'cyAnchorNode' : 'cyDeviceNode';
     node.data('name', properties.name || '');
     node.addClass(nodeClass);
+    if(isAnchor(device)) {
+      node.data('position', { x: device.position[0],  y: device.position[1] });
+    }
     if(properties.imageUrl) { node.data('image', properties.imageUrl); }
     addDeviceEdges(deviceSignature, device);
   }
@@ -131,6 +133,16 @@ let charlotte = (function() {
       let isPresent = edgeSignatures.includes(edge.id());
       if(!isPresent) { cy.remove(edge); }
     });
+  }
+
+
+  // Determine if the given device is an anchor with valid x and y position
+  function isAnchor(device) {
+    return device.hasOwnProperty('position') &&
+           Array.isArray(device.position) &&
+           (device.position.length >= 2) &&
+           (typeof device.position[0] === 'number') &&
+           (typeof device.position[1] === 'number');
   }
 
 
