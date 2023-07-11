@@ -1,5 +1,5 @@
 /**
- * Copyright reelyActive 2021
+ * Copyright reelyActive 2021-2023
  * We believe in an open Internet of Things
  */
 
@@ -7,20 +7,23 @@
 let charlotte = (function() {
 
   // Internal constants
-  const MAX_RSSI = -30;
-  const DEFAULT_LAYOUT_NAME = 'cose';
-  const DEFAULT_COSE_LAYOUT_OPTIONS = {
-      name: "cose",
-      animate: false,
-      randomize: false,
-      idealEdgeLength: function(edge) { return MAX_RSSI - edge.data('rssi'); },
-      edgeElasticity: function(edge) { return 32 *
-                                             (MAX_RSSI - edge.data('rssi')); },
-      initialTemp: 40
+  const MAX_EXPECTED_RSSI = -30;
+  const DEFAULT_LAYOUT_NAME = 'fcose';
+  const DEFAULT_FCOSE_LAYOUT_OPTIONS = {
+      name: "fcose",
+      quality: "default",
+      animate: true,
+      animationDuration: 1600,
+      randomize: true,
+      idealEdgeLength: (edge) => {
+        return Math.max(1, MAX_EXPECTED_RSSI - edge.data('rssi'));
+      },
+      padding: 24,
+      fixedNodeConstraint: []
   };
   const DEFAULT_GRAPH_STYLE = [
       { selector: "node",
-        style: { label: "data(name)", "font-size": "0.6em",
+        style: { label: "data(name)", "font-size": "0.6em", "color": "#666",
                  "min-zoomed-font-size": "16px" } },
       { selector: "node[image]",
         style: { "background-image": "data(image)", "border-color": "#83b7d0",
@@ -38,7 +41,6 @@ let charlotte = (function() {
         style: { "background-color": "#ff6900", "border-color": "#ff6900" } }
   ];
 
-
   // Internal variables
   let cy;
   let layout;
@@ -50,10 +52,12 @@ let charlotte = (function() {
   function spin(devices) {
     let deviceSignatures = Object.keys(devices);
 
-    cy.nodes().forEach(function(node) {
+    cy.nodes().forEach((node) => {
       let isPresent = deviceSignatures.includes(node.id());
       if(!isPresent) { cy.remove(node); }
     });
+
+    options.layout.fixedNodeConstraint = [];
 
     for(const deviceSignature in devices) {
       addDeviceNode(deviceSignature, devices[deviceSignature]);
@@ -69,7 +73,8 @@ let charlotte = (function() {
     devicesProperties = devicesPropertiesMap || new Map();
     options = {
         container: container,
-        layout: layoutOptions || DEFAULT_COSE_LAYOUT_OPTIONS,
+        layout: layoutOptions ||
+                Object.assign({}, DEFAULT_FCOSE_LAYOUT_OPTIONS),
         style: style || DEFAULT_GRAPH_STYLE
     };
 
@@ -90,10 +95,13 @@ let charlotte = (function() {
 
     let node = cy.getElementById(deviceSignature);
     let nodeClass = isAnchor(device) ? 'cyAnchorNode' : 'cyDeviceNode';
-    node.data('name', properties.name || '');
+    node.data('name', properties.title || '');
     node.addClass(nodeClass);
     if(isAnchor(device)) {
-      node.data('position', { x: device.position[0],  y: device.position[1] });
+      let position = { x: device.position[0],  y: device.position[1] };
+      options.layout.fixedNodeConstraint.push({ nodeId: deviceSignature,
+                                                position: position });
+      console.log(options.layout.fixedNodeConstraint);
     }
     if(properties.imageUrl) { node.data('image', properties.imageUrl); }
     addDeviceEdges(deviceSignature, device);

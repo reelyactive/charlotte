@@ -1,5 +1,5 @@
 /**
- * Copyright reelyActive 2021
+ * Copyright reelyActive 2021-2023
  * We believe in an open Internet of Things
  */
 
@@ -30,9 +30,43 @@ function setContainerHeight() {
 
 // Poll the context
 function poll() {
-  getContext(DEFAULT_CONTEXT_URL, function(status, response) {
+  getContext(DEFAULT_CONTEXT_URL, (status, response) => {
     charlotte.spin(response.devices || {});
+    updateDevicePropertiesMap(response.devices || {});
   });
+}
+
+
+// Update the devicePropertiesMap
+function updateDevicePropertiesMap(devices) {
+  for(const deviceSignature in devices) {
+    if(!devicePropertiesMap.has(deviceSignature)) {
+      let device = devices[deviceSignature];
+      let deviceUrl = device.url;
+
+      if(!deviceUrl && device.hasOwnProperty('statid')) {
+        deviceUrl = device.statid.uri;
+      }
+
+      if(deviceUrl) {
+        cormorant.retrieveStory(deviceUrl, {}, (story) => {
+          let imageUrl = cuttlefishStory.determineImageUrl(story);
+          let title;
+
+          if(!deviceUrl.includes('sniffypedia.org')) {
+            title = cuttlefishStory.determineTitle(story);
+          }
+
+          if(imageUrl || title) {
+            let deviceProperties = {};
+            if(imageUrl) { deviceProperties.imageUrl = imageUrl }
+            if(title) { deviceProperties.title = title }
+            devicePropertiesMap.set(deviceSignature, deviceProperties);
+          }
+        });
+      }
+    }
+  }
 }
 
 
