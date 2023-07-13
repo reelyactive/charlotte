@@ -101,7 +101,6 @@ let charlotte = (function() {
       let position = { x: device.position[0],  y: device.position[1] };
       options.layout.fixedNodeConstraint.push({ nodeId: deviceSignature,
                                                 position: position });
-      console.log(options.layout.fixedNodeConstraint);
     }
     if(properties.imageUrl) { node.data('image', properties.imageUrl); }
     addDeviceEdges(deviceSignature, device);
