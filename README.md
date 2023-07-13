@@ -41,6 +41,20 @@ charlotte.spin(devices);
 Open the _index.html_ file in a web browser for __charlotte__ to render the web of devices as a fCoSE graph.
 
 
+Contributing
+------------
+
+Discover [how to contribute](CONTRIBUTING.md) to this open source project which upholds a standard [code of conduct](CODE_OF_CONDUCT.md).
+
+
+Security
+--------
+
+Consult our [security policy](SECURITY.md) for best practices using this open source software and to report vulnerabilities.
+
+[![Known Vulnerabilities](https://snyk.io/test/github/reelyactive/charlotte/badge.svg)](https://snyk.io/test/github/reelyactive/charlotte)
+
+
 License
 -------
 
