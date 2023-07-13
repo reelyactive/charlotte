@@ -5,11 +5,16 @@
 
 
 // Constant definitions
+const STATUS_OK = 200;
 const DEMO_SEARCH_PARAMETER = 'demo';
 const DEFAULT_CONTEXT_URL = 'http://localhost:3001/context/';
 const HLC_MIN_HEIGHT_PX = 480;
 const HLC_UNUSABLE_HEIGHT_PX = 120;
 const SIGNATURE_SEPARATOR = '/';
+
+// DOM elements
+let connectIcon = document.querySelector('#connectIcon');
+let demoalert = document.querySelector('#demoalert');
 
 // Other variables
 let devicePropertiesMap = new Map();
@@ -42,8 +47,14 @@ function poll() {
   }
   else {
     getContext(DEFAULT_CONTEXT_URL, (status, response) => {
-      charlotte.spin(response.devices || {});
-      updateDevicePropertiesMap(response.devices || {});
+      if(status === STATUS_OK) {
+        let devices = JSON.parse(response).devices || {};
+        charlotte.spin(devices);
+        updateDevicePropertiesMap(devices);
+      }
+      else {
+        demoalert.hidden = false;
+      }
     });
   }
 }
@@ -88,8 +99,7 @@ function getContext(url, callback) {
 
   httpRequest.onreadystatechange = function() {
     if(httpRequest.readyState === XMLHttpRequest.DONE) {
-      return callback(httpRequest.status,
-                      JSON.parse(httpRequest.responseText));
+      return callback(httpRequest.status, httpRequest.responseText);
     }
   };
   httpRequest.open('GET', url);

@@ -130,6 +130,19 @@
     </nav>
     <!-- Content -->
     <div class="container-fluid">
+      <div class="position-relative">
+        <div class="position-absolute top-0 start-0 mt-4 ms-4">
+          <div class="alert alert-ambient alert-dismissible fade show"
+               role="alert" id="demoalert" hidden>
+            <i class="fas fa-exclamation-triangle animate-breathing me-2"></i>
+            Could not connect to Pareto Anywhere API,
+            <a href="?demo=default"
+               class="alert-link"> enable demo </a> instead?
+            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+          </div>
+        </div>
+      </div>
       <div class="d-block">
         <div id="cy-container">
           <div id="cy" class="w-100 h-100"></div>
