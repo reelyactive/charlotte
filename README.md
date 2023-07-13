@@ -41,6 +41,12 @@ charlotte.spin(devices);
 Open the _index.html_ file in a web browser for __charlotte__ to render the web of devices as a fCoSE graph.
 
 
+Acknowledgements
+----------------
+
+__charlotte__ uses [Cytoscape.js](https://js.cytoscape.org/) which was created at the University of Toronto and published in Oxford Bioinformatics ([2016](https://academic.oup.com/bioinformatics/article/32/2/309/1744007), [2023](https://academic.oup.com/bioinformatics/article/39/1/btad031/6988031)), and the [cytoscape.js-fcose](https://github.com/iVis-at-Bilkent/cytoscape.js-fcose) fCoSE layout algorithm extension developed by the [iVis Lab](https://cs.bilkent.edu.tr/~ivis/) at Bilkent University.  We extend our thanks to the developers of these open source projects.
+
+
 Contributing
 ------------
 
