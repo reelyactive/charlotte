@@ -63,6 +63,7 @@ let charlotte = (function() {
       addDeviceNode(deviceSignature, devices[deviceSignature]);
     }
 
+    fitConstraintToViewport();
     updateLayout();
   }
 
@@ -150,6 +151,41 @@ let charlotte = (function() {
            (device.position.length >= 2) &&
            (typeof device.position[0] === 'number') &&
            (typeof device.position[1] === 'number');
+  }
+
+
+  // Fit the fixedNodeConstraint to the dimensions of the viewport
+  function fitConstraintToViewport() {
+    if(options.layout.fixedNodeConstraint.length <= 1) {
+      return;
+    }
+
+    let viewportWidth = cy.width();
+    let viewportHeight = cy.height();
+    let minX = Number.MAX_SAFE_INTEGER;
+    let maxX = Number.MIN_SAFE_INTEGER;
+    let minY = Number.MAX_SAFE_INTEGER;
+    let maxY = Number.MIN_SAFE_INTEGER;
+
+    options.layout.fixedNodeConstraint.forEach((constraint) => {
+      if(constraint.position.x < minX) { minX = constraint.position.x; }
+      if(constraint.position.x > maxX) { maxX = constraint.position.x; }
+      if(constraint.position.y < minY) { minY = constraint.position.y; }
+      if(constraint.position.y > maxY) { maxY = constraint.position.y; }
+    });
+
+    let offsetX = 0 - minX;
+    let offsetY = 0 - maxY;
+    let ratioX = (maxX - minX) / viewportWidth;
+    let ratioY = (minY - maxY) / viewportHeight;
+
+    options.layout.fixedNodeConstraint.forEach((constraint) => {
+      constraint.position.x += offsetX;
+      if(ratioX !== 0) { constraint.position.x /= ratioX; }
+      constraint.position.y += offsetY;
+      if(ratioY !== 0) { constraint.position.y /= ratioY; }
+      console.log(constraint.position.x, constraint.position.y);
+    });
   }
 
 
