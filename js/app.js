@@ -5,13 +5,18 @@
 
 
 // Constant definitions
+const DEMO_SEARCH_PARAMETER = 'demo';
 const DEFAULT_CONTEXT_URL = 'http://localhost:3001/context/';
 const HLC_MIN_HEIGHT_PX = 480;
 const HLC_UNUSABLE_HEIGHT_PX = 120;
+const SIGNATURE_SEPARATOR = '/';
 
 // Other variables
 let devicePropertiesMap = new Map();
 
+// Initialise based on URL search parameters, if any
+let searchParams = new URLSearchParams(location.search);
+let isDemo = searchParams.has(DEMO_SEARCH_PARAMETER);
 
 setContainerHeight();
 charlotte.init(document.getElementById('cy'), devicePropertiesMap);
@@ -30,10 +35,17 @@ function setContainerHeight() {
 
 // Poll the context
 function poll() {
-  getContext(DEFAULT_CONTEXT_URL, (status, response) => {
+  if(isDemo) {
+    let response = starling.getContext('/context');
     charlotte.spin(response.devices || {});
     updateDevicePropertiesMap(response.devices || {});
-  });
+  }
+  else {
+    getContext(DEFAULT_CONTEXT_URL, (status, response) => {
+      charlotte.spin(response.devices || {});
+      updateDevicePropertiesMap(response.devices || {});
+    });
+  }
 }
 
 
