@@ -15,6 +15,7 @@ const SIGNATURE_SEPARATOR = '/';
 // DOM elements
 let connectIcon = document.querySelector('#connectIcon');
 let demoalert = document.querySelector('#demoalert');
+let target = document.getElementById('cy');
 
 // Other variables
 let devicePropertiesMap = new Map();
@@ -24,7 +25,6 @@ let searchParams = new URLSearchParams(location.search);
 let isDemo = searchParams.has(DEMO_SEARCH_PARAMETER);
 
 setContainerHeight();
-charlotte.init(document.getElementById('cy'), devicePropertiesMap);
 poll();
 setInterval(poll, 5000);
 
@@ -42,7 +42,7 @@ function setContainerHeight() {
 function poll() {
   if(isDemo) {
     let response = starling.getContext('/context');
-    charlotte.spin(response.devices || {});
+    charlotte.spin(response.devices || {}, target);
     updateDevicePropertiesMap(response.devices || {});
   }
   else {

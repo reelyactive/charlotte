@@ -44,12 +44,14 @@ let charlotte = (function() {
   // Internal variables
   let cy;
   let layout;
-  let options;
-  let devicesProperties;
+  let cyOptions;
+  let digitalTwins;
 
 
   // Spin a web
-  function spin(devices) {
+  function spin(devices, target, options) {
+    init(target, options);
+
     let deviceSignatures = Object.keys(devices);
 
     cy.nodes().forEach((node) => {
@@ -57,7 +59,7 @@ let charlotte = (function() {
       if(!isPresent) { cy.remove(node); }
     });
 
-    options.layout.fixedNodeConstraint = [];
+    cyOptions.layout.fixedNodeConstraint = [];
 
     for(const deviceSignature in devices) {
       addDeviceNode(deviceSignature, devices[deviceSignature]);
@@ -69,25 +71,33 @@ let charlotte = (function() {
 
 
   // Initialise the web
-  function init(container, devicesPropertiesMap, layoutName, layoutOptions,
-                style) {
-    devicesProperties = devicesPropertiesMap || new Map();
-    options = {
-        container: container,
-        layout: layoutOptions ||
+  function init(target, options) {
+    options = options || {};
+    digitalTwins = options.digitalTwins || new Map();
+
+    // TODO: check if the options/target changed and return otherwise
+
+    let layoutName = options.layoutName || DEFAULT_LAYOUT_NAME;
+
+    cyOptions = {
+        container: target,
+        layout: options.layout ||
                 Object.assign({}, DEFAULT_FCOSE_LAYOUT_OPTIONS),
-        style: style || DEFAULT_GRAPH_STYLE
+        style: options.style || DEFAULT_GRAPH_STYLE
     };
 
-    cy = cytoscape(options);
-    layout = cy.layout({ name: layoutName || DEFAULT_LAYOUT_NAME, cy: cy });
-    cy.on('resize', updateLayout);
+    if(!cy) { // TODO: execute on change of options too!
+      cy = cytoscape(cyOptions);
+      layout = cy.layout({ name: layoutName, cy: cy });
+      cy.on('resize', updateLayout);
+    }
   }
 
 
   // Add a device node to the hyperlocal context graph
   function addDeviceNode(deviceSignature, device) {
-    let properties = devicesProperties.get(deviceSignature) || {};
+    let digitalTwin = digitalTwins.get(deviceSignature) || {};
+    let storyCovers = digitalTwin.storyCovers || [];
     let isExistingNode = (cy.getElementById(deviceSignature).size() > 0);
 
     if(!isExistingNode) {
@@ -96,14 +106,20 @@ let charlotte = (function() {
 
     let node = cy.getElementById(deviceSignature);
     let nodeClass = isAnchor(device) ? 'cyAnchorNode' : 'cyDeviceNode';
-    node.data('name', properties.title || '');
+    if(storyCovers.length > 0) {
+      let leadStoryCover = storyCovers[0];
+      node.data('name', leadStoryCover.title || '');
+      if(leadStoryCover.imageUrl) { node.data('image', properties.imageUrl); }
+    }
+    else {
+      node.data('name', deviceSignature);
+    }
     node.addClass(nodeClass);
     if(isAnchor(device)) {
       let position = { x: device.position[0],  y: device.position[1] };
-      options.layout.fixedNodeConstraint.push({ nodeId: deviceSignature,
-                                                position: position });
+      cyOptions.layout.fixedNodeConstraint.push({ nodeId: deviceSignature,
+                                                  position: position });
     }
-    if(properties.imageUrl) { node.data('image', properties.imageUrl); }
     addDeviceEdges(deviceSignature, device);
   }
 
@@ -156,7 +172,7 @@ let charlotte = (function() {
 
   // Fit the fixedNodeConstraint to the dimensions of the viewport
   function fitConstraintToViewport() {
-    if(options.layout.fixedNodeConstraint.length <= 1) {
+    if(cyOptions.layout.fixedNodeConstraint.length <= 1) {
       return;
     }
 
@@ -167,7 +183,7 @@ let charlotte = (function() {
     let minY = Number.MAX_SAFE_INTEGER;
     let maxY = Number.MIN_SAFE_INTEGER;
 
-    options.layout.fixedNodeConstraint.forEach((constraint) => {
+    cyOptions.layout.fixedNodeConstraint.forEach((constraint) => {
       if(constraint.position.x < minX) { minX = constraint.position.x; }
       if(constraint.position.x > maxX) { maxX = constraint.position.x; }
       if(constraint.position.y < minY) { minY = constraint.position.y; }
@@ -179,12 +195,11 @@ let charlotte = (function() {
     let ratioX = (maxX - minX) / viewportWidth;
     let ratioY = (minY - maxY) / viewportHeight;
 
-    options.layout.fixedNodeConstraint.forEach((constraint) => {
+    cyOptions.layout.fixedNodeConstraint.forEach((constraint) => {
       constraint.position.x += offsetX;
       if(ratioX !== 0) { constraint.position.x /= ratioX; }
       constraint.position.y += offsetY;
       if(ratioY !== 0) { constraint.position.y /= ratioY; }
-      console.log(constraint.position.x, constraint.position.y);
     });
   }
 
@@ -192,15 +207,14 @@ let charlotte = (function() {
   // Update the layout
   function updateLayout() {
     layout.stop();
-    layout = cy.elements().makeLayout(options.layout);
+    layout = cy.elements().makeLayout(cyOptions.layout);
     layout.run();
   }
 
 
   // Expose the following functions and variables
   return {
-    spin: spin,
-    init: init
+    spin: spin
   }
 
 }());
