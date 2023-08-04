@@ -49,7 +49,7 @@ function poll() {
     getContext(DEFAULT_CONTEXT_URL, (status, response) => {
       if(status === STATUS_OK) {
         let devices = JSON.parse(response).devices || {};
-        charlotte.spin(devices);
+        charlotte.spin(devices, target);
         updateDevicePropertiesMap(devices);
       }
       else {
