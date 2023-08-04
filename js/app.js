@@ -39,8 +39,18 @@ function setContainerHeight() {
 function poll() {
   if(isDemo) {
     let response = starling.getContext('/context');
-    charlotte.spin(response.devices || {}, target);
-    updateDevicePropertiesMap(response.devices || {});
+    let devices = response.devices || {};
+    for(deviceSignature in devices) {
+      let device = devices[deviceSignature];
+      cormorant.retrieveDigitalTwin(deviceSignature, device, null,
+                                    (digitalTwin) => {
+        if(digitalTwin) {
+          // TODO: update the node immediately?
+        }
+      });
+    }
+    charlotte.spin(devices, target,
+                   { digitalTwins: cormorant.digitalTwins });
   }
   else {
     getContext(DEFAULT_CONTEXT_URL, (status, response) => {
