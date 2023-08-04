@@ -109,7 +109,9 @@ let charlotte = (function() {
     if(storyCovers.length > 0) {
       let leadStoryCover = storyCovers[0];
       node.data('name', leadStoryCover.title || '');
-      if(leadStoryCover.imageUrl) { node.data('image', properties.imageUrl); }
+      if(leadStoryCover.imageUrl) {
+        node.data('image', leadStoryCover.imageUrl);
+      }
     }
     else {
       node.data('name', deviceSignature);
