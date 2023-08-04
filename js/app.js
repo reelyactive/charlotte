@@ -17,9 +17,6 @@ let connectIcon = document.querySelector('#connectIcon');
 let demoalert = document.querySelector('#demoalert');
 let target = document.getElementById('cy');
 
-// Other variables
-let devicePropertiesMap = new Map();
-
 // Initialise based on URL search parameters, if any
 let searchParams = new URLSearchParams(location.search);
 let isDemo = searchParams.has(DEMO_SEARCH_PARAMETER);
@@ -49,46 +46,22 @@ function poll() {
     getContext(DEFAULT_CONTEXT_URL, (status, response) => {
       if(status === STATUS_OK) {
         let devices = JSON.parse(response).devices || {};
-        charlotte.spin(devices, target);
-        updateDevicePropertiesMap(devices);
+        for(deviceSignature in devices) {
+          let device = devices[deviceSignature];
+          cormorant.retrieveDigitalTwin(deviceSignature, device, null,
+                                        (digitalTwin) => {
+            if(digitalTwin) {
+              // TODO: update the node immediately?
+            }
+          });
+        }
+        charlotte.spin(devices, target,
+                       { digitalTwins: cormorant.digitalTwins });
       }
       else {
         demoalert.hidden = false;
       }
     });
-  }
-}
-
-
-// Update the devicePropertiesMap
-function updateDevicePropertiesMap(devices) {
-  for(const deviceSignature in devices) {
-    if(!devicePropertiesMap.has(deviceSignature)) {
-      let device = devices[deviceSignature];
-      let deviceUrl = device.url;
-
-      if(!deviceUrl && device.hasOwnProperty('statid')) {
-        deviceUrl = device.statid.uri;
-      }
-
-      if(deviceUrl) {
-        cormorant.retrieveStory(deviceUrl, {}, (story) => {
-          let imageUrl = cuttlefishStory.determineImageUrl(story);
-          let title;
-
-          if(!deviceUrl.includes('sniffypedia.org')) {
-            title = cuttlefishStory.determineTitle(story);
-          }
-
-          if(imageUrl || title) {
-            let deviceProperties = {};
-            if(imageUrl) { deviceProperties.imageUrl = imageUrl }
-            if(title) { deviceProperties.title = title }
-            devicePropertiesMap.set(deviceSignature, deviceProperties);
-          }
-        });
-      }
-    }
   }
 }
 
