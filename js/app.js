@@ -25,6 +25,9 @@ setContainerHeight();
 poll();
 setInterval(poll, 5000);
 
+// Handle a node tap
+charlotte.on('tap', (nodeId) => { console.log(nodeId, 'tapped'); });
+
 
 // Set the height of the graph container
 function setContainerHeight() {

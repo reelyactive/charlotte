@@ -46,6 +46,7 @@ let charlotte = (function() {
   let layout;
   let cyOptions;
   let digitalTwins;
+  let eventCallbacks = { tap: [] };
 
 
   // Spin a web
@@ -90,6 +91,9 @@ let charlotte = (function() {
       cy = cytoscape(cyOptions);
       layout = cy.layout({ name: layoutName, cy: cy });
       cy.on('resize', updateLayout);
+      cy.on('tap', (event) => { 
+        eventCallbacks['tap'].forEach(callback => callback(event.target.id()));
+      });
     }
   }
 
@@ -214,9 +218,21 @@ let charlotte = (function() {
   }
 
 
+  // Register a callback for the given event
+  let setEventCallback = function(event, callback) {
+    let isValidEvent = event && eventCallbacks.hasOwnProperty(event);
+    let isValidCallback = callback && (typeof callback === 'function');
+
+    if(isValidEvent && isValidCallback) {
+      eventCallbacks[event].push(callback);
+    }
+  }
+
+
   // Expose the following functions and variables
   return {
-    spin: spin
+    spin: spin,
+    on: setEventCallback
   }
 
 }());
