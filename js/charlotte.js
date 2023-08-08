@@ -104,6 +104,25 @@ let charlotte = (function() {
   }
 
 
+  // Update the digital twin of the identified node(s)
+  function updateDigitalTwin(deviceSignature, digitalTwin) {
+    digitalTwin = digitalTwin || {};
+    let nodes = [];
+
+    for(const graphId in graphs) {
+      let graph = graphs[graphId];
+      let isExistingNode = (graph.cy.getElementById(deviceSignature).size()>0);
+      if(isExistingNode) {
+        nodes.push(graph.cy.getElementById(deviceSignature));
+      }
+    }
+
+    nodes.forEach((node) => {
+      updateNodeStoryCover(node, digitalTwin.storyCovers, deviceSignature); 
+    });
+  }
+
+
   // Add a device node to the hyperlocal context graph
   function addDeviceNode(deviceSignature, device, graph) {
     let digitalTwin = graph.digitalTwins.get(deviceSignature) || {};
@@ -116,17 +135,10 @@ let charlotte = (function() {
 
     let node = graph.cy.getElementById(deviceSignature);
     let nodeClass = isAnchor(device) ? 'cyAnchorNode' : 'cyDeviceNode';
-    if(storyCovers.length > 0) {
-      let leadStoryCover = storyCovers[0];
-      node.data('name', leadStoryCover.title || '');
-      if(leadStoryCover.imageUrl) {
-        node.data('image', leadStoryCover.imageUrl);
-      }
-    }
-    else {
-      node.data('name', deviceSignature);
-    }
+
+    updateNodeStoryCover(node, storyCovers, deviceSignature);
     node.addClass(nodeClass);
+
     if(isAnchor(device)) {
       let position = { x: device.position[0],  y: device.position[1] };
       graph.options.layout.fixedNodeConstraint.push({ nodeId: deviceSignature,
@@ -169,6 +181,21 @@ let charlotte = (function() {
       let isPresent = edgeSignatures.includes(edge.id());
       if(!isPresent) { graph.cy.remove(edge); }
     });
+  }
+
+
+  // Update the image/title of the node from the given story covers
+  function updateNodeStoryCover(node, storyCovers, deviceSignature) {
+    if(Array.isArray(storyCovers) && (storyCovers.length > 0)) {
+      let leadStoryCover = storyCovers[0];
+      node.data('name', leadStoryCover.title || '');
+      if(leadStoryCover.imageUrl) {
+        node.data('image', leadStoryCover.imageUrl);
+      }
+    }
+    else {
+      node.data('name', deviceSignature);
+    }
   }
 
 
@@ -239,6 +266,7 @@ let charlotte = (function() {
   return {
     init: init,
     spin: spin,
+    updateDigitalTwin: updateDigitalTwin,
     on: setEventCallback
   }
 

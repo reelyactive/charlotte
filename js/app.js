@@ -45,12 +45,12 @@ function poll() {
   if(isDemo) {
     let response = starling.getContext('/context');
     let devices = response.devices || {};
-    for(deviceSignature in devices) {
+    for(const deviceSignature in devices) {
       let device = devices[deviceSignature];
       cormorant.retrieveDigitalTwin(deviceSignature, device, null,
-                                    (digitalTwin) => {
-        if(digitalTwin) {
-          // TODO: update the node immediately?
+                                    (digitalTwin, isRetrievedFromMemory) => {
+        if(digitalTwin && !isRetrievedFromMemory) {
+          charlotte.updateDigitalTwin(deviceSignature, digitalTwin);
         }
       });
     }
@@ -60,12 +60,12 @@ function poll() {
     getContext(DEFAULT_CONTEXT_URL, (status, response) => {
       if(status === STATUS_OK) {
         let devices = JSON.parse(response).devices || {};
-        for(deviceSignature in devices) {
+        for(const deviceSignature in devices) {
           let device = devices[deviceSignature];
           cormorant.retrieveDigitalTwin(deviceSignature, device, null,
-                                        (digitalTwin) => {
-            if(digitalTwin) {
-              // TODO: update the node immediately?
+                                        (digitalTwin, isRetrievedFromMemory) => {
+            if(digitalTwin && !isRetrievedFromMemory) {
+              charlotte.updateDigitalTwin(deviceSignature, digitalTwin);
             }
           });
         }
