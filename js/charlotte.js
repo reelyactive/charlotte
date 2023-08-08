@@ -42,73 +42,79 @@ let charlotte = (function() {
   ];
 
   // Internal variables
-  let cy;
-  let layout;
-  let cyOptions;
-  let digitalTwins;
+  let graphs = {};
   let eventCallbacks = { tap: [] };
-
-
-  // Spin a web
-  function spin(devices, target, options) {
-    init(target, options);
-
-    let deviceSignatures = Object.keys(devices);
-
-    cy.nodes().forEach((node) => {
-      let isPresent = deviceSignatures.includes(node.id());
-      if(!isPresent) { cy.remove(node); }
-    });
-
-    cyOptions.layout.fixedNodeConstraint = [];
-
-    for(const deviceSignature in devices) {
-      addDeviceNode(deviceSignature, devices[deviceSignature]);
-    }
-
-    fitConstraintToViewport();
-    updateLayout();
-  }
 
 
   // Initialise the web
   function init(target, options) {
-    options = options || {};
-    digitalTwins = options.digitalTwins || new Map();
+    if(!target || !target.id) {
+      throw new Error('charlotte.js cannot init without target/id.');
+    }
 
-    // TODO: check if the options/target changed and return otherwise
+    let graph = {};
+    options = options || {};
+    graph.digitalTwins = options.digitalTwins || new Map();
 
     let layoutName = options.layoutName || DEFAULT_LAYOUT_NAME;
 
-    cyOptions = {
+    graph.options = {
         container: target,
         layout: options.layout ||
                 Object.assign({}, DEFAULT_FCOSE_LAYOUT_OPTIONS),
         style: options.style || DEFAULT_GRAPH_STYLE
     };
 
-    if(!cy) { // TODO: execute on change of options too!
-      cy = cytoscape(cyOptions);
-      layout = cy.layout({ name: layoutName, cy: cy });
-      cy.on('resize', updateLayout);
-      cy.on('tap', (event) => { 
-        eventCallbacks['tap'].forEach(callback => callback(event.target.id()));
-      });
+    graph.cy = cytoscape(graph.options);
+    graph.layout = graph.cy.layout({ name: layoutName, cy: graph.cy });
+    //graph.cy.on('resize', updateLayout, graph); // TODO: handle resize?
+    graph.cy.on('tap', (event) => { 
+      eventCallbacks['tap'].forEach(callback => callback(event.target.id()));
+    });
+
+    graphs[target.id] = graph;
+  }
+
+
+  // Spin a web
+  function spin(devices, target, options) {
+    if(!target || !target.id) {
+      throw new Error('charlotte.js cannot spin without target/id.');
     }
+    if(!graphs.hasOwnProperty(target.id)) {
+      throw new Error('charlotte.js cannot spin, init target first.');
+    }
+
+    let graph = graphs[target.id];
+    let deviceSignatures = Object.keys(devices);
+
+    graph.cy.nodes().forEach((node) => {
+      let isPresent = deviceSignatures.includes(node.id());
+      if(!isPresent) { graph.cy.remove(node); }
+    });
+
+    graph.options.layout.fixedNodeConstraint = [];
+
+    for(const deviceSignature in devices) {
+      addDeviceNode(deviceSignature, devices[deviceSignature], graph);
+    }
+
+    fitConstraintToViewport(graph);
+    updateLayout(graph);
   }
 
 
   // Add a device node to the hyperlocal context graph
-  function addDeviceNode(deviceSignature, device) {
-    let digitalTwin = digitalTwins.get(deviceSignature) || {};
+  function addDeviceNode(deviceSignature, device, graph) {
+    let digitalTwin = graph.digitalTwins.get(deviceSignature) || {};
     let storyCovers = digitalTwin.storyCovers || [];
-    let isExistingNode = (cy.getElementById(deviceSignature).size() > 0);
+    let isExistingNode = (graph.cy.getElementById(deviceSignature).size() > 0);
 
     if(!isExistingNode) {
-      cy.add({ group: "nodes", data: { id: deviceSignature } });
+      graph.cy.add({ group: "nodes", data: { id: deviceSignature } });
     }
 
-    let node = cy.getElementById(deviceSignature);
+    let node = graph.cy.getElementById(deviceSignature);
     let nodeClass = isAnchor(device) ? 'cyAnchorNode' : 'cyDeviceNode';
     if(storyCovers.length > 0) {
       let leadStoryCover = storyCovers[0];
@@ -123,35 +129,35 @@ let charlotte = (function() {
     node.addClass(nodeClass);
     if(isAnchor(device)) {
       let position = { x: device.position[0],  y: device.position[1] };
-      cyOptions.layout.fixedNodeConstraint.push({ nodeId: deviceSignature,
-                                                  position: position });
+      graph.options.layout.fixedNodeConstraint.push({ nodeId: deviceSignature,
+                                                      position: position });
     }
-    addDeviceEdges(deviceSignature, device);
+    addDeviceEdges(deviceSignature, device, graph);
   }
 
 
   // Add device edges to the hyperlocal context graph
-  function addDeviceEdges(deviceSignature, device) {
+  function addDeviceEdges(deviceSignature, device, graph) {
     let edgeSignatures = [];
 
     if(device.hasOwnProperty('nearest')) {
       device.nearest.forEach(function(entry) {
         let peerSignature = entry.device;
         let edgeSignature = deviceSignature + '@' + peerSignature;
-        let edge = cy.getElementById(edgeSignature);
+        let edge = graph.cy.getElementById(edgeSignature);
         let isExistingEdge = (edge.size() > 0);
-        isExistingNode = (cy.getElementById(peerSignature).size() > 0);
+        isExistingNode = (graph.cy.getElementById(peerSignature).size() > 0);
         edgeSignatures.push(edgeSignature);
 
         if(!isExistingNode) {
-          cy.add({ group: "nodes", data: { id: peerSignature } });
+          graph.cy.add({ group: "nodes", data: { id: peerSignature } });
         }
         if(!isExistingEdge) {
-          cy.add({ group: "edges", data: { id: edgeSignature,
-                                           source: deviceSignature,
-                                           target: peerSignature,
-                                           name: entry.rssi + "dBm",
-                                           rssi: entry.rssi } });
+          graph.cy.add({ group: "edges", data: { id: edgeSignature,
+                                                 source: deviceSignature,
+                                                 target: peerSignature,
+                                                 name: entry.rssi + "dBm",
+                                                 rssi: entry.rssi } });
         }
         else {
           edge.data({ name: entry.rssi + "dBm", rssi: entry.rssi });
@@ -159,9 +165,9 @@ let charlotte = (function() {
       });
     }
 
-    cy.elements('edge[id^="' + deviceSignature + '@"]').forEach(function(edge) {
+    graph.cy.elements('edge[id^="' + deviceSignature + '@"]').forEach(edge => {
       let isPresent = edgeSignatures.includes(edge.id());
-      if(!isPresent) { cy.remove(edge); }
+      if(!isPresent) { graph.cy.remove(edge); }
     });
   }
 
@@ -177,19 +183,19 @@ let charlotte = (function() {
 
 
   // Fit the fixedNodeConstraint to the dimensions of the viewport
-  function fitConstraintToViewport() {
-    if(cyOptions.layout.fixedNodeConstraint.length <= 1) {
+  function fitConstraintToViewport(graph) {
+    if(graph.options.layout.fixedNodeConstraint.length <= 1) {
       return;
     }
 
-    let viewportWidth = cy.width();
-    let viewportHeight = cy.height();
+    let viewportWidth = graph.cy.width();
+    let viewportHeight = graph.cy.height();
     let minX = Number.MAX_SAFE_INTEGER;
     let maxX = Number.MIN_SAFE_INTEGER;
     let minY = Number.MAX_SAFE_INTEGER;
     let maxY = Number.MIN_SAFE_INTEGER;
 
-    cyOptions.layout.fixedNodeConstraint.forEach((constraint) => {
+    graph.options.layout.fixedNodeConstraint.forEach((constraint) => {
       if(constraint.position.x < minX) { minX = constraint.position.x; }
       if(constraint.position.x > maxX) { maxX = constraint.position.x; }
       if(constraint.position.y < minY) { minY = constraint.position.y; }
@@ -201,7 +207,7 @@ let charlotte = (function() {
     let ratioX = (maxX - minX) / viewportWidth;
     let ratioY = (minY - maxY) / viewportHeight;
 
-    cyOptions.layout.fixedNodeConstraint.forEach((constraint) => {
+    graph.options.layout.fixedNodeConstraint.forEach((constraint) => {
       constraint.position.x += offsetX;
       if(ratioX !== 0) { constraint.position.x /= ratioX; }
       constraint.position.y += offsetY;
@@ -211,10 +217,10 @@ let charlotte = (function() {
 
 
   // Update the layout
-  function updateLayout() {
-    layout.stop();
-    layout = cy.elements().makeLayout(cyOptions.layout);
-    layout.run();
+  function updateLayout(graph) {
+    graph.layout.stop();
+    graph.layout = graph.cy.elements().makeLayout(graph.options.layout);
+    graph.layout.run();
   }
 
 
@@ -231,6 +237,7 @@ let charlotte = (function() {
 
   // Expose the following functions and variables
   return {
+    init: init,
     spin: spin,
     on: setEventCallback
   }

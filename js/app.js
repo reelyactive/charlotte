@@ -22,11 +22,13 @@ let searchParams = new URLSearchParams(location.search);
 let isDemo = searchParams.has(DEMO_SEARCH_PARAMETER);
 
 setContainerHeight();
+
+// Initialise charlotte and handle node taps
+charlotte.init(target, { digitalTwins: cormorant.digitalTwins });
+charlotte.on('tap', (nodeId) => { console.log(nodeId, 'tapped'); });
+
 poll();
 setInterval(poll, 5000);
-
-// Handle a node tap
-charlotte.on('tap', (nodeId) => { console.log(nodeId, 'tapped'); });
 
 
 // Set the height of the graph container
@@ -52,8 +54,7 @@ function poll() {
         }
       });
     }
-    charlotte.spin(devices, target,
-                   { digitalTwins: cormorant.digitalTwins });
+    charlotte.spin(devices, target, {});
   }
   else {
     getContext(DEFAULT_CONTEXT_URL, (status, response) => {
@@ -68,8 +69,7 @@ function poll() {
             }
           });
         }
-        charlotte.spin(devices, target,
-                       { digitalTwins: cormorant.digitalTwins });
+        charlotte.spin(devices, target, {});
       }
       else {
         demoalert.hidden = false;
