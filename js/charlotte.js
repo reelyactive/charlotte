@@ -120,6 +120,32 @@ let charlotte = (function() {
   }
 
 
+  // Select a specific node
+  function selectNode(deviceSignature) {
+    let isSelectedNodeFound = false;
+
+    graphs.forEach((graph) => {
+      if(graph.selectedDeviceSignature &&
+         (graph.cy.getElementById(graph.selectedDeviceSignature).size() > 0)) {
+        let formerNode = graph.cy.getElementById(graph.selectedDeviceSignature);
+        formerNode.removeClass('cySelectedNode');
+      }
+
+      if(graph.cy.getElementById(deviceSignature).size() > 0) {
+        let currentNode = graph.cy.getElementById(deviceSignature);
+        currentNode.addClass('cySelectedNode');
+        isSelectedNodeFound = true;
+        graph.selectedDeviceSignature = deviceSignature;
+      }
+      else {
+        graph.selectedDeviceSignature = null;
+      }
+    });
+
+    return isSelectedNodeFound;
+  }
+
+
   // Add a device node to the hyperlocal context graph
   function addDeviceNode(deviceSignature, device, graph) {
     let digitalTwin = graph.digitalTwins.get(deviceSignature) || {};
@@ -244,20 +270,7 @@ let charlotte = (function() {
   function handleNodeTap(event) {
     let tappedDeviceSignature = event.target.id();
 
-    graphs.forEach((graph) => {
-      let node;
-
-      if(graph.selectedDeviceSignature &&
-         (graph.cy.getElementById(graph.selectedDeviceSignature).size() > 0)) {
-        node = graph.cy.getElementById(graph.selectedDeviceSignature);
-        node.removeClass('cySelectedNode');
-      }
-
-      node = graph.cy.getElementById(tappedDeviceSignature);
-      node.addClass('cySelectedNode');
-      graph.selectedDeviceSignature = tappedDeviceSignature;
-    });
-
+    selectNode(tappedDeviceSignature);
     eventCallbacks['tap'].forEach(callback => callback(tappedDeviceSignature));
   }
 
@@ -286,6 +299,7 @@ let charlotte = (function() {
     init: init,
     spin: spin,
     updateDigitalTwin: updateDigitalTwin,
+    selectNode: selectNode,
     on: setEventCallback
   }
 
