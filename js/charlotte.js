@@ -42,7 +42,7 @@ let charlotte = (function() {
   ];
 
   // Internal variables
-  let graphs = {};
+  let graphs = new Map();
   let eventCallbacks = { tap: [] };
 
 
@@ -70,7 +70,7 @@ let charlotte = (function() {
     //graph.cy.on('resize', updateLayout, graph); // TODO: handle resize?
     graph.cy.on('tap', handleNodeTap);
 
-    graphs[target.id] = graph;
+    graphs.set(target.id, graph);
   }
 
 
@@ -79,11 +79,11 @@ let charlotte = (function() {
     if(!target || !target.id) {
       throw new Error('charlotte.js cannot spin without target/id.');
     }
-    if(!graphs.hasOwnProperty(target.id)) {
+    if(!graphs.has(target.id)) {
       throw new Error('charlotte.js cannot spin, init target first.');
     }
 
-    let graph = graphs[target.id];
+    let graph = graphs.get(target.id);
     let deviceSignatures = Object.keys(devices);
 
     graph.cy.nodes().forEach((node) => {
@@ -107,13 +107,12 @@ let charlotte = (function() {
     digitalTwin = digitalTwin || {};
     let nodes = [];
 
-    for(const graphId in graphs) {
-      let graph = graphs[graphId];
+    graphs.forEach((graph) => {
       let isExistingNode = (graph.cy.getElementById(deviceSignature).size()>0);
       if(isExistingNode) {
         nodes.push(graph.cy.getElementById(deviceSignature));
       }
-    }
+    });
 
     nodes.forEach((node) => {
       updateNodeStoryCover(node, digitalTwin.storyCovers, deviceSignature); 
@@ -245,8 +244,7 @@ let charlotte = (function() {
   function handleNodeTap(event) {
     let tappedDeviceSignature = event.target.id();
 
-    for(const graphId in graphs) {
-      let graph = graphs[graphId];
+    graphs.forEach((graph) => {
       let node;
 
       if(graph.selectedDeviceSignature &&
@@ -258,7 +256,7 @@ let charlotte = (function() {
       node = graph.cy.getElementById(tappedDeviceSignature);
       node.addClass('cySelectedNode');
       graph.selectedDeviceSignature = tappedDeviceSignature;
-    }
+    });
 
     eventCallbacks['tap'].forEach(callback => callback(tappedDeviceSignature));
   }
