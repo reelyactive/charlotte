@@ -68,9 +68,7 @@ let charlotte = (function() {
     graph.cy = cytoscape(graph.options);
     graph.layout = graph.cy.layout({ name: layoutName, cy: graph.cy });
     //graph.cy.on('resize', updateLayout, graph); // TODO: handle resize?
-    graph.cy.on('tap', (event) => { 
-      eventCallbacks['tap'].forEach(callback => callback(event.target.id()));
-    });
+    graph.cy.on('tap', handleNodeTap);
 
     graphs[target.id] = graph;
   }
@@ -240,6 +238,29 @@ let charlotte = (function() {
       constraint.position.y += offsetY;
       if(ratioY !== 0) { constraint.position.y /= ratioY; }
     });
+  }
+
+
+  // Handle a user tap on a specific node
+  function handleNodeTap(event) {
+    let tappedDeviceSignature = event.target.id();
+
+    for(const graphId in graphs) {
+      let graph = graphs[graphId];
+      let node;
+
+      if(graph.selectedDeviceSignature &&
+         (graph.cy.getElementById(graph.selectedDeviceSignature).size() > 0)) {
+        node = graph.cy.getElementById(graph.selectedDeviceSignature);
+        node.removeClass('cySelectedNode');
+      }
+
+      node = graph.cy.getElementById(tappedDeviceSignature);
+      node.addClass('cySelectedNode');
+      graph.selectedDeviceSignature = tappedDeviceSignature;
+    }
+
+    eventCallbacks['tap'].forEach(callback => callback(tappedDeviceSignature));
   }
 
 
