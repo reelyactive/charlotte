@@ -84,17 +84,31 @@ let charlotte = (function() {
     }
 
     let graph = graphs.get(target.id);
-    let deviceSignatures = Object.keys(devices);
 
-    graph.cy.nodes().forEach((node) => {
-      let isPresent = deviceSignatures.includes(node.id());
-      if(!isPresent) { graph.cy.remove(node); }
-    });
+    if(devices instanceof Map) {
+      graph.cy.nodes().forEach((node) => {
+        if(!devices.has(node.id())) { graph.cy.remove(node); }
+      });
 
-    graph.options.layout.fixedNodeConstraint = [];
+      graph.options.layout.fixedNodeConstraint = [];
 
-    for(const deviceSignature in devices) {
-      addDeviceNode(deviceSignature, devices[deviceSignature], graph);
+      devices.forEach((device, deviceSignature) => {
+        addDeviceNode(deviceSignature, device, graph);
+      });
+    }
+    else {
+      let deviceSignatures = Object.keys(devices);
+
+      graph.cy.nodes().forEach((node) => {
+        let isPresent = deviceSignatures.includes(node.id());
+        if(!isPresent) { graph.cy.remove(node); }
+      });
+
+      graph.options.layout.fixedNodeConstraint = [];
+
+      for(const deviceSignature in devices) {
+        addDeviceNode(deviceSignature, devices[deviceSignature], graph);
+      }
     }
 
     fitConstraintToViewport(graph);
