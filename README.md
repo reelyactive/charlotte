@@ -31,11 +31,14 @@ Include in an _index.html_ file the viewport, __charlotte.js__ script and Cytosc
 Include in a _js/app.js_ the code to initialise and spin the web of devices:
 
 ```javascript
-let devicePropertiesMap = new Map();
+let target = document.getElementById('cy');
+let digitalTwins = new Map(); // See cormorant.js
 let devices = { /* ex: from Pareto Anywhere /context API */ };
 
-charlotte.init(document.getElementById('cy'), devicePropertiesMap);
-charlotte.spin(devices);
+charlotte.init(target, { digitalTwins: digitalTwins });
+charlotte.on('tap', (nodeId) => { /* Handle tap of node in graph */ });
+
+charlotte.spin(devices, target, {});
 ```
 
 Open the _index.html_ file in a web browser for __charlotte__ to render the web of devices as a fCoSE graph.
