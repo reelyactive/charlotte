@@ -25,7 +25,7 @@ setContainerHeight();
 
 // Initialise charlotte and handle node taps
 charlotte.init(target, { digitalTwins: cormorant.digitalTwins });
-charlotte.on('tap', (nodeId) => { console.log(nodeId, 'tapped'); });
+charlotte.on('tap', (nodeId) => { });
 
 if(!isDemo) {
   beaver.poll(SERVER_URL, { intervalMilliseconds: POLL_MILLISECONDS });
