@@ -1,7 +1,9 @@
 charlotte
 =========
 
-__charlotte__ spins a [hyperlocal context](https://www.reelyactive.com/context/) graph into a web visualisation using Cytoscape.js.
+__charlotte__ spins a [hyperlocal context](https://www.reelyactive.com/context/) graph and digital twins into a web visualisation using Cytoscape.js.
+
+![Overview of charlotte.js](https://reelyactive.github.io/charlotte/images/overview.png)
 
 __charlotte__ is lightweight client-side JavaScript that runs in the browser.  See a live demo using the code in this repository at: [reelyactive.github.io/charlotte/?demo=default](https://reelyactive.github.io/charlotte/?demo=default)
 
