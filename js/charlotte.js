@@ -8,6 +8,7 @@ let charlotte = (function() {
 
   // Internal constants
   const MAX_EXPECTED_RSSI = -30;
+  const DEFAULT_MAX_EDGES_PER_NODE = 3;
   const DEFAULT_LAYOUT_NAME = 'fcose';
   const DEFAULT_FCOSE_LAYOUT_OPTIONS = {
       name: "fcose",
@@ -55,6 +56,8 @@ let charlotte = (function() {
     let graph = {};
     options = options || {};
     graph.digitalTwins = options.digitalTwins || new Map();
+    graph.maxEdgesPerNode = options.maxEdgesPerNode ||
+                            DEFAULT_MAX_EDGES_PER_NODE;
 
     let layoutName = options.layoutName || DEFAULT_LAYOUT_NAME;
 
@@ -190,26 +193,28 @@ let charlotte = (function() {
     let edgeSignatures = [];
 
     if(device.hasOwnProperty('nearest')) {
-      device.nearest.forEach(function(entry) {
-        let peerSignature = entry.device;
-        let edgeSignature = deviceSignature + '@' + peerSignature;
-        let edge = graph.cy.getElementById(edgeSignature);
-        let isExistingEdge = (edge.size() > 0);
-        isExistingNode = (graph.cy.getElementById(peerSignature).size() > 0);
-        edgeSignatures.push(edgeSignature);
+      device.nearest.forEach((entry, index) => {
+        if(index < graph.maxEdgesPerNode) {
+          let peerSignature = entry.device;
+          let edgeSignature = deviceSignature + '@' + peerSignature;
+          let edge = graph.cy.getElementById(edgeSignature);
+          let isExistingEdge = (edge.size() > 0);
+          isExistingNode = (graph.cy.getElementById(peerSignature).size() > 0);
+          edgeSignatures.push(edgeSignature);
 
-        if(!isExistingNode) {
-          graph.cy.add({ group: "nodes", data: { id: peerSignature } });
-        }
-        if(!isExistingEdge) {
-          graph.cy.add({ group: "edges", data: { id: edgeSignature,
-                                                 source: deviceSignature,
-                                                 target: peerSignature,
-                                                 name: entry.rssi + "dBm",
-                                                 rssi: entry.rssi } });
-        }
-        else {
-          edge.data({ name: entry.rssi + "dBm", rssi: entry.rssi });
+          if(!isExistingNode) {
+            graph.cy.add({ group: "nodes", data: { id: peerSignature } });
+          }
+          if(!isExistingEdge) {
+            graph.cy.add({ group: "edges", data: { id: edgeSignature,
+                                                   source: deviceSignature,
+                                                   target: peerSignature,
+                                                   name: entry.rssi + "dBm",
+                                                   rssi: entry.rssi } });
+          }
+          else {
+            edge.data({ name: entry.rssi + "dBm", rssi: entry.rssi });
+          }
         }
       });
     }
