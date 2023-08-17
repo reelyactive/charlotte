@@ -34,9 +34,8 @@ Include in a _js/app.js_ the code to initialise and spin the web of devices:
 
 ```javascript
 let target = document.getElementById('cy');
-let digitalTwins = new Map(); // See cormorant.js
-let devices = { /* ex: from Pareto Anywhere /context API */ };
-
+let digitalTwins = new Map(); // Or use cormorant.digitalTwins (see below)
+let devices = new Map();      // Or use beaver.devices (see below)
 charlotte.init(target, { digitalTwins: digitalTwins });
 charlotte.on('tap', (nodeId) => { /* Handle tap of node in graph */ });
 
@@ -44,6 +43,44 @@ charlotte.spin(devices, target, {});
 ```
 
 Open the _index.html_ file in a web browser for __charlotte__ to render the web of devices as a fCoSE graph.
+
+
+Developing web apps with beaver, cormorant & charlotte
+------------------------------------------------------
+
+Developing web apps using the [Pareto Anywhere](https://www.reelyactive.com/pareto/anywhere/) APIs is straightforward with [beaver](https://github.com/reelyactive/beaver), [cormorant](https://github.com/reelyactive/cormorant/) and __charlotte__.
+
+Include in an _index.html_ file the viewport, __charlotte.js__ script and dependencies:
+
+```html
+<html>
+  <head></head>
+  <body>
+    <div id="cy-container">
+      <div id="cy" class="w-100 h-100"></div>
+    </div>
+    <script src="js/cytoscape.min.js"></script>
+    <script src="js/layout-base.js"></script>
+    <script src="js/cose-base.js"></script>
+    <script src="js/cytoscape-fcose.js"></script>
+    <script src="js/cormorant.js"></script>
+    <script src="js/beaver.js"></script>
+    <script src="js/charlotte.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
+```
+
+Include in a _js/app.js_ the code to poll the hyperlocal context, retrieve any digital twins, and spin the web of devices:
+
+```javascript
+let target = document.getElementById('cy');
+
+charlotte.init(target, { digitalTwins: cormorant.digitalTwins });
+charlotte.on('tap', (nodeId) => { /* Handle tap of node in graph */ });
+
+charlotte.spin(beaver.devices, target, {});
+```
 
 
 Acknowledgements
