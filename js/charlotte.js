@@ -219,6 +219,36 @@ let charlotte = (function() {
         }
       });
     }
+    else if(device.hasOwnProperty('raddec') &&
+            Array.isArray(device.raddec.rssiSignature)) {
+      device.raddec.rssiSignature.forEach((entry, index) => {
+        if(index < graph.maxEdgesPerNode) {
+          let peerSignature = entry.receiverId + '/' + entry.receiverIdType;
+          let edgeSignature = deviceSignature + '@' + peerSignature;
+          let edge = graph.cy.getElementById(edgeSignature);
+          let isExistingEdge = (edge.size() > 0);
+          isExistingNode = (graph.cy.getElementById(peerSignature).size() > 0);
+          edgeSignatures.push(edgeSignature);
+
+          if(!isExistingNode) {
+            graph.cy.add({ group: "nodes", data: { id: peerSignature } });
+            let node = graph.cy.getElementById(peerSignature);
+            node.data('name', peerSignature);
+            node.addClass('cyAnchorNode');
+          }
+          if(!isExistingEdge) {
+            graph.cy.add({ group: "edges", data: { id: edgeSignature,
+                                                   source: deviceSignature,
+                                                   target: peerSignature,
+                                                   name: entry.rssi + "dBm",
+                                                   rssi: entry.rssi } });
+          }
+          else {
+            edge.data({ name: entry.rssi + "dBm", rssi: entry.rssi });
+          }
+        }
+      });
+    }
 
     graph.cy.elements('edge[id^="' + deviceSignature + '@"]').forEach(edge => {
       let isPresent = edgeSignatures.includes(edge.id());
