@@ -1,5 +1,5 @@
 /**
- * Copyright reelyActive 2021-2023
+ * Copyright reelyActive 2021-2024
  * We believe in an open Internet of Things
  */
 
@@ -40,7 +40,8 @@ let charlotte = (function() {
       { selector: ".cyAnchorNode",
         style: { "background-color": "#0770a2", "border-color": "#0770a2" } },
       { selector: ".cySelectedNode",
-        style: { "background-color": "#ff6900", "border-color": "#ff6900" } }
+        style: { "background-color": "#ff6900", "border-color": "#ff6900" } },
+      { selector: ".cyHidden", style: { "display": "none" } }
   ];
 
   // Internal variables
@@ -80,6 +81,8 @@ let charlotte = (function() {
 
   // Spin a web
   function spin(devices, target, options) {
+    options = options || {};
+
     if(!target || !target.id) {
       throw new Error('charlotte.js cannot spin without target/id.');
     }
@@ -114,6 +117,13 @@ let charlotte = (function() {
         addDeviceNode(deviceSignature, devices[deviceSignature], graph);
       }
     }
+
+    if(options.filters && Number.isFinite(options.filters.minRSSI)) {
+      graph.cy.remove('edge[rssi < ' + options.filters.minRSSI + ']');
+    }
+
+    graph.cy.nodes('node[[degree = 0]]').addClass('cyHidden');
+    graph.cy.nodes('node[[degree > 0]]').removeClass('cyHidden');
 
     fitConstraintToViewport(graph);
     updateLayout(graph);

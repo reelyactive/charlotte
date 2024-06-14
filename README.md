@@ -36,10 +36,11 @@ Include in a _js/app.js_ the code to initialise and spin the web of devices:
 let target = document.getElementById('cy');
 let digitalTwins = new Map(); // Or use cormorant.digitalTwins (see below)
 let devices = new Map();      // Or use beaver.devices (see below)
+let options = {};             // See Options section below
 charlotte.init(target, { digitalTwins: digitalTwins });
 charlotte.on('tap', (nodeId) => { /* Handle tap of node in graph */ });
 
-charlotte.spin(devices, target, {});
+charlotte.spin(devices, target, options);
 ```
 
 Open the _index.html_ file in a web browser for __charlotte__ to render the web of devices as a fCoSE graph.
@@ -81,6 +82,21 @@ charlotte.on('tap', (nodeId) => { /* Handle tap of node in graph */ });
 
 charlotte.spin(beaver.devices, target, {});
 ```
+
+
+Options
+-------
+
+__charlotte__ supports the following options for the spin function:
+
+    {
+      filters: { minRSSI: -100 }
+    }
+
+For instance, to spin the web of devices with signal strength (RSSI) > 70 dBm, use the following options:
+
+```javascript
+charlotte.spin(devices, target, { filters: { minRSSI: -70 } });
 
 
 Acknowledgements
