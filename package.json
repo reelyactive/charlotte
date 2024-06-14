@@ -13,7 +13,7 @@
     "semantic web",
     "client-side"
   ],
-  "version": "2.0.2",
+  "version": "2.1.0",
   "main": "./js/charlotte.js",
   "files": [
     "./js/charlotte.js"
