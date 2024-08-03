@@ -97,6 +97,7 @@ For instance, to spin the web of devices with signal strength (RSSI) > 70 dBm, u
 
 ```javascript
 charlotte.spin(devices, target, { filters: { minRSSI: -70 } });
+```
 
 
 Acknowledgements
