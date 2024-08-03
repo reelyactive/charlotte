@@ -106,6 +106,17 @@ Acknowledgements
 __charlotte__ uses [Cytoscape.js](https://js.cytoscape.org/) which was created at the University of Toronto and published in Oxford Bioinformatics ([2016](https://academic.oup.com/bioinformatics/article/32/2/309/1744007), [2023](https://academic.oup.com/bioinformatics/article/39/1/btad031/6988031)), and the [cytoscape.js-fcose](https://github.com/iVis-at-Bilkent/cytoscape.js-fcose) fCoSE layout algorithm extension developed by the [iVis Lab](https://cs.bilkent.edu.tr/~ivis/) at Bilkent University.  We extend our thanks to the developers of these open source projects.
 
 
+Modular Architecture
+--------------------
+
+__charlotte.js__ is easily combined with the following complementary client-side modules:
+- [beaver.js](https://github.com/reelyactive/beaver)
+- [cormorant.js](https://github.com/reelyactive/cormorant)
+- [cuttlefish.js](https://github.com/reelyactive/cuttlefish)
+
+Learn more about the [reelyActive Open Source Software packages](https://reelyactive.github.io/diy/oss-packages/), all of which are bundled together as [Pareto Anywhere](https://github.com/reelyactive/pareto-anywhere) open source IoT middleware.
+
+
 Contributing
 ------------
 
