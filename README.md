@@ -109,9 +109,9 @@ In the classic children's story [Charlotte's Web](https://en.wikipedia.org/wiki/
 
 While in the story, Charlotte spins _words_ into her webs, in her client-side habitat, __charlotte.js__ will spin _graphs_ that allow humans to visualise real-time physical and semantic relationships between people, places and things.  Her "humble" hope is that the webs she spins in your browser will positively influence data-based decision-making, so that you don't have to rely on your spidey senses alone!
 
-As in the story, __charlotte.js__ can't do it all by herself.  She uses [Cytoscape.js](https://js.cytoscape.org/) to help her with the graphs themselves, while her unlikely client-side barnyard companions—[beaver](), [cormorant]() and the "radiant" [cuttlefish]()—collect and prepare the source data.
+As in the story, __charlotte.js__ can't do it all by herself.  She uses [Cytoscape.js](https://js.cytoscape.org/) to help her with the graphs themselves, while her unlikely client-side barnyard companions—[beaver](https://github.com/reelyactive/beaver), [cormorant](https://github.com/reelyactive/cormorant) and the "radiant" [cuttlefish](https://github.com/reelyactive/cuttlefish)—collect and prepare the source data.
 
-Speaking of barnyard companions, __charlotte.js__ is actually our second barn-themed mascot after barnowl.  Hay, isn't that "terrific"!
+Speaking of barnyard companions, __charlotte.js__ is actually our second _barn_-themed mascot after [barnowl](https://github.com/reelyactive/barnowl).  _Hay,_ isn't that "terrific"!
 
 
 Acknowledgements
